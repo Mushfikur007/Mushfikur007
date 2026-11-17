@@ -4,6 +4,8 @@
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-light.svg" width="100%" alt="29+ Odoo modules in production, 26+ mobile API endpoints, contributions and active days"></picture>
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/achievements-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/achievements-light.svg" width="100%" alt="GitHub achievements, earned and in progress"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/calendar-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/calendar-light.svg" width="100%" alt="Contribution calendar for the last 12 months"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stack-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stack-light.svg" width="100%" alt="Core technologies and focus"></picture>
