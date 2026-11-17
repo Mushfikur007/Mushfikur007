@@ -2,7 +2,7 @@
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/header-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/header-light.svg" width="100%" alt="Mushfikur Rahman, Software Engineer at Betopia Group"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-light.svg" width="100%" alt="29+ Odoo modules in production, 26+ mobile API endpoints, contributions and active days"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/stats-light.svg" width="100%" alt="Contributions in the last 12 months and this month, active days and longest streak"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/calendar-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/calendar-light.svg" width="100%" alt="Contribution calendar for the last 12 months"></picture>
 
@@ -20,7 +20,7 @@
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/about-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/about-light.svg" width="100%" alt="Education, recognition and languages"></picture>
 
 <p align="center"><sub>
-<a href="https://mushfikur-rahman-portfolio.vercel.app/">portfolio</a> &nbsp;·&nbsp; 
+<a href="https://mushfikur007.github.io/portfolio/">portfolio</a> &nbsp;·&nbsp; 
 <a href="https://www.linkedin.com/in/mushfikur-rahman-537735203">linkedin</a> &nbsp;·&nbsp; 
 <a href="mailto:mail.mushfikurrahman@gmail.com">email</a>
 </sub></p>
