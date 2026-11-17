@@ -20,7 +20,7 @@
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/about-dark.svg"><img src="https://raw.githubusercontent.com/Mushfikur007/Mushfikur007/output/about-light.svg" width="100%" alt="Education, recognition and languages"></picture>
 
 <p align="center"><sub>
-<a href="https://mushfikur007.github.io/portfolio/">portfolio</a> &nbsp;·&nbsp; 
+<a href="https://mushfikur-rahman-portfolio.vercel.app/">portfolio</a> &nbsp;·&nbsp; 
 <a href="https://www.linkedin.com/in/mushfikur-rahman-537735203">linkedin</a> &nbsp;·&nbsp; 
 <a href="mailto:mail.mushfikurrahman@gmail.com">email</a>
 </sub></p>
