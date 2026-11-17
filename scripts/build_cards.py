@@ -10,6 +10,7 @@ import datetime as dt
 import json
 import math
 import os
+import re
 import urllib.request
 from xml.sax.saxutils import escape
 
@@ -294,6 +295,71 @@ def about(p, t):
     return svg(h, ''.join(body), 'Education, recognition and languages')
 
 
+# name, glyph (16-unit grid), hint when locked, tier thresholds
+ACHIEVEMENTS = [
+    ('Pull Shark', '<path d="M2 12.5c3-1 4.5-5.5 4-10 3 1.5 6 5 6.5 10M1 12.5h14"/>', None, (2, 16, 128, 1024)),
+    ('YOLO', '<path d="M9 1.5L3.5 9h4L7 14.5 12.5 7h-4z"/>', 'merge without review', None),
+    ('Quickdraw', '<circle cx="8" cy="9" r="5.5"/><path d="M8 9V6M6.5 1.5h3M12.5 4l1-1"/>', 'close within 5 min', None),
+    ('Pair Extraordinaire', '<circle cx="6" cy="8" r="4"/><circle cx="10" cy="8" r="4"/>', 'co-authored PR', (1, 10, 24, 48)),
+    ('Starstruck', '<path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/>', None, (16, 128, 512, 4096)),
+    ('Galaxy Brain', '<path d="M2.5 3.5h11v7h-6l-3 3v-3h-2z"/><path d="M5.5 7l1.8 1.6L10.5 5.5"/>', '2 accepted answers', (2, 8, 16, 32)),
+    ('Public Sponsor', '<path d="M8 13.5S2 10 2 5.8A3 3 0 0 1 8 4.5a3 3 0 0 1 6 1.3C14 10 8 13.5 8 13.5z"/>', 'sponsor anyone', None),
+]
+
+
+def earned_achievements(login):
+    """{name: tier} scraped from the public achievements tab (GitHub has no API for it)."""
+    req = urllib.request.Request(f'https://github.com/{login}?tab=achievements', headers={'User-Agent': 'profile-cards'})
+    try:
+        with urllib.request.urlopen(req) as r:
+            page = r.read().decode()
+    except OSError:
+        return {}
+    found = {}
+    for m in re.finditer(r'alt="Achievement: ([^"]+)"', page):
+        tier = re.search(r'achievement-tier-label[^>]*>\s*x(\d)', page[m.end():m.end() + 1500])
+        found[m.group(1)] = max(found.get(m.group(1), 1), int(tier.group(1)) if tier else 1)
+    return found
+
+
+def merged_prs(login, token):
+    req = urllib.request.Request(f'https://api.github.com/search/issues?q=author:{login}+is:pr+is:merged',
+                                 headers={'Authorization': f'bearer {token}', 'Accept': 'application/vnd.github+json'})
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.load(r)['total_count']
+    except OSError:
+        return 0
+
+
+def achievements(p, s, t):
+    h = 168
+    earned = s['achievements']
+    progress = {'Pull Shark': (s['merged_prs'], 'merged PRs'), 'Starstruck': (s['top_stars'], 'stars on one repo')}
+    items = sorted(ACHIEVEMENTS, key=lambda a: a[0] not in earned)
+    cw = (W - 40) / len(items)
+    body = [card(0, 0, W, h, t), text(28, 40, 'Achievements', 15, t['text'], 600),
+            text(W - 28, 40, f"{len(earned)} earned  ·  {len(items) - len(earned)} to go", 13, t['muted'], anchor='end')]
+    for i, (name, glyph, hint, tiers) in enumerate(items):
+        cx, cy = 20 + cw * i + cw / 2, 86
+        have = name in earned
+        if have:
+            status = 'earned' + (f' · x{earned[name]}' if earned[name] > 1 else '')
+        elif name in progress:
+            n, unit = progress[name]
+            status = f'{n} / {tiers[0]} {unit.split()[0]}' if n < tiers[0] else 'unlocking soon'
+        else:
+            status = hint
+        ring = (f'<circle cx="{cx:.1f}" cy="{cy}" r="24" fill="{t["accent"]}" fill-opacity=".1" stroke="{t["accent"]}"/>' if have else
+                f'<circle cx="{cx:.1f}" cy="{cy}" r="24" fill="none" stroke="{t["faint"]}" stroke-dasharray="3 4"/>')
+        body += [ring,
+                 f'<g transform="translate({cx - 12:.1f},{cy - 12}) scale(1.5)" fill="none" stroke="{t["accent"] if have else t["faint"]}" '
+                 f'stroke-width="1" stroke-linecap="round" stroke-linejoin="round">{glyph}</g>',
+                 text(f'{cx:.1f}', cy + 46, name, 12, t['text'] if have else t['muted'], 500 if have else 400, anchor='middle'),
+                 text(f'{cx:.1f}', cy + 63, status, 10, t['accent'] if have else t['muted'], family=MONO, anchor='middle')]
+    return svg(h, ''.join(body), f"Achievements: {', '.join(earned) or 'none yet'}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='dist')
@@ -303,9 +369,13 @@ def main():
     user = fetch(p['login'], os.environ['GH_TOKEN'])
     s = stats(user)
     repos = {r['name']: r for r in user['repositories']['nodes']}
+    s['achievements'] = earned_achievements(p['login'])
+    s['merged_prs'] = merged_prs(p['login'], os.environ['GH_TOKEN'])
+    s['top_stars'] = max((r['stargazerCount'] for r in repos.values()), default=0)
     os.makedirs(a.out, exist_ok=True)
     for name, t in THEMES.items():
         files = {'header': header(p, s, t), 'stats': tiles(p, s, t), 'calendar': calendar(p, s, t), 'stack': stack(p, s, t)}
+        files['achievements'] = achievements(p, s, t)
         if p.get('background'):
             files['about'] = about(p, t)
         for i, proj in enumerate(p['projects'], 1):
