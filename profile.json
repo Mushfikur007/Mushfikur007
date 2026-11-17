@@ -1,43 +1,94 @@
 {
   "login": "Mushfikur007",
   "name": "Mushfikur Rahman",
-  "role": "Senior Software Engineer · Betopia Group",
-  "tagline": "I design and ship ERP systems on Odoo 19.",
-  "location": "Gazipur, Dhaka",
+  "role": "Software Engineer · Betopia Group",
+  "tagline": "Backend & Odoo ERP developer and ERP business analyst.",
+  "location": "Dhaka, Bangladesh",
   "stack": [
     "Python",
-    "Odoo 19",
+    "Odoo ORM",
     "PostgreSQL",
+    "REST APIs",
     "JavaScript",
     "OWL",
     "QWeb / XML",
-    "JSON-RPC",
+    "React",
+    "Node.js",
+    "Redis",
     "Linux",
-    "Nginx",
-    "Git",
-    "GitHub Actions"
+    "Git"
   ],
   "focus": [
-    "ERP architecture and custom Odoo modules",
-    "Payroll, HR and accounting automation",
-    "Data migration and company consolidation"
+    "Requirements from C-suite stakeholders",
+    "Procurement, HRMS, payroll and CRM",
+    "ACLs, record rules and portal access"
   ],
   "projects": [
     {
-      "repo": "ora"
+      "title": "Enterprise Procurement Platform",
+      "description": "Request, approvals, tendering, bidding, award, PO, GRN and vendor bill, with a full audit trail.",
+      "tech": "Odoo · Python · PostgreSQL"
     },
     {
-      "repo": "EduHub",
-      "description": "Learning management system with OAuth sign-in, courses and admin tools."
+      "title": "Procurement AI Autopilot",
+      "description": "Natural-language intake, vendor recommendations and RFQ support, with human approval on every record.",
+      "tech": "Python · Odoo · OpenAI API"
     },
     {
-      "repo": "EasyEV-Charging-using-php-and-mySQL",
-      "title": "EasyEV Charging",
-      "description": "EV charging locations, check-in/out sessions and history in PHP + MySQL."
+      "title": "Mobile API Layer",
+      "description": "26+ tested endpoints for auth, attendance, leave, requisitions, approvals and payslips.",
+      "tech": "Odoo controllers · REST · token auth"
     },
     {
-      "repo": "portfolio",
-      "description": "Personal portfolio site."
+      "title": "ERP Analytics Dashboards",
+      "description": "KPI cards, charts and drilldowns for HR, payroll, CRM, projects, sales and procurement.",
+      "tech": "OWL · JavaScript · PostgreSQL"
+    },
+    {
+      "title": "Documents, Helpdesk & Employee Voice",
+      "description": "Document management, team helpdesk with chatbot tickets, room booking and anonymous feedback.",
+      "tech": "Odoo · Portal · Mail · OWL"
+    },
+    {
+      "title": "CRM, Sales & Partner Systems",
+      "description": "Presale pipeline, domestic sales KPIs, campaign management and affiliate/referral tracking.",
+      "tech": "Odoo CRM · Sales · Portal"
+    }
+  ],
+  "email": "mail.mushfikurrahman@gmail.com",
+  "highlights": [
+    {
+      "icon": "cube",
+      "value": "29+",
+      "label": "Odoo modules in production"
+    },
+    {
+      "icon": "plug",
+      "value": "26+",
+      "label": "tested mobile API endpoints"
+    }
+  ],
+  "background": [
+    {
+      "label": "education",
+      "lines": [
+        "B.Sc. Computer Science & Eng.",
+        "Green University of Bangladesh"
+      ]
+    },
+    {
+      "label": "recognition",
+      "lines": [
+        "2nd place, HULT Prize On-Campus",
+        "2022 · among 450 teams"
+      ]
+    },
+    {
+      "label": "languages",
+      "lines": [
+        "Bangla · native",
+        "English · professional"
+      ]
     }
   ]
 }

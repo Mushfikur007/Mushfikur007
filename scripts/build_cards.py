@@ -90,37 +90,52 @@ def stats(user):
 
 # ---------------------------------------------------------------- cards
 
-def ridges(days, x0, y0, w, h, t):
-    """Twelve stacked lines, one per month of the last year, shaped by daily contributions."""
+def ridges(days, x0, y0, w, h, t, frames=16, dur=48):
+    """Twelve stacked lines, one per month of the last year.
+
+    Each month's activity loops through the line: frame f samples the month shifted by
+    f/frames of its length, and SMIL morphs between frames, so the peaks drift forever
+    while the ends stay flat."""
     months = {}
     for d in days:
         months.setdefault(d['date'][:7], []).append(d['contributionCount'])
     rows = list(months.values())[-12:]
-    n, lift = 96, 52
-    curves = []
-    for r in rows:
-        curve = []
+    n, lift = 64, 52
+
+    def sample(r, shift):
+        size, curve = len(r), []
         for k in range(n + 1):
-            pos = k / n * (len(r) - 1)
-            curve.append(sum(c * math.exp(-((pos - j) ** 2) / 3) for j, c in enumerate(r)))
-        curves.append(curve)
-    peak = sorted(v for c in curves for v in c)[int((n + 1) * len(curves) * 0.97)] or 1
+            pos = (k / n * size + shift * size) % size
+            v = 0
+            for j, c in enumerate(r):
+                dist = abs(pos - j)
+                dist = min(dist, size - dist)
+                v += c * math.exp(-dist * dist / 5)
+            curve.append(v)
+        return curve
+
+    shapes = [[sample(r, f / frames) for f in range(frames)] for r in rows]
+    flat = sorted(v for row in shapes for v in row[0])
+    peak = flat[int(len(flat) * 0.97)] or 1
     gap = (h - lift) / (len(rows) - 1)
     out = []
-    for i, curve in enumerate(curves):
+    for i, row in enumerate(shapes):
         base = y0 + lift + i * gap
-        pts = []
-        for k, v in enumerate(curve):
-            u = k / n
-            window = math.sin(math.pi * u) ** 1.5
-            pts.append((x0 + u * w, base - math.sqrt(min(v / peak, 1.15)) * lift * window))
-        d = 'M' + ' L'.join(f'{px:.1f},{py:.1f}' for px, py in pts)
+        ds = []
+        for curve in row + row[:1]:
+            pts = []
+            for k, v in enumerate(curve):
+                u = k / n
+                y = base - math.sqrt(min(v / peak, 1.15)) * lift * math.sin(math.pi * u) ** 1.5
+                pts.append(f'{x0 + u * w:.0f},{y:.1f}')
+            ds.append('M' + ' L'.join(pts))
+        close = f' L{x0 + w},{base + 8} L{x0},{base + 8} Z'
+        anim = f'<animate attributeName="d" dur="{dur}s" repeatCount="indefinite" values="%s"/>'
         last = i == len(rows) - 1
         stroke = t['accent'] if last else t['muted']
-        out.append(f'<path d="{d} L{x0 + w},{base + 8} L{x0},{base + 8} Z" fill="{t["bg"]}" stroke="none"/>'
-                   f'<path class="r" style="animation-delay:{i * 0.07:.2f}s" d="{d}" fill="none" stroke="{stroke}" '
-                   f'stroke-width="{1.4 if last else 1}" stroke-opacity="{1 if last else 0.55}" '
-                   f'stroke-linejoin="round" pathLength="1"/>')
+        out.append(f'<path d="{ds[0]}{close}" fill="{t["bg"]}">{anim % ";".join(d + close for d in ds)}</path>'
+                   f'<path d="{ds[0]}" fill="none" stroke="{stroke}" stroke-width="{1.4 if last else 1}" '
+                   f'stroke-opacity="{1 if last else 0.55}" stroke-linejoin="round">{anim % ";".join(ds)}</path>')
     return ''.join(out)
 
 
@@ -128,9 +143,6 @@ def header(p, s, t):
     h = 248
     art_x, art_w = 500, 300
     body = [
-        '<style>.r{stroke-dasharray:1;animation:d 1.6s ease-out backwards}'
-        '@keyframes d{from{stroke-dashoffset:1}}'
-        '@media (prefers-reduced-motion:reduce){.r{animation:none}}</style>',
         card(0, 0, W, h, t),
         text(36, 52, p['login'].lower(), 12, t['muted'], family=MONO, extra='letter-spacing="1.5"'),
         text(36, 100, p['name'], 36, t['text'], 600, extra='letter-spacing="-0.8"'),
@@ -147,6 +159,8 @@ ICONS = {
     'pulse': '<polyline points="1,8 4.5,8 6.5,3 9.5,13 11.5,8 15,8" fill="none"/>',
     'flame': '<path d="M8 1.5c.6 2.6 3.6 4 3.6 7.6a3.6 3.6 0 0 1-7.2 0c0-1.7.8-2.7 1.7-3.5.2 1.3.9 2 1.6 2.2C7 6 7.3 3.6 8 1.5z" fill="none"/>',
     'cal': '<rect x="2" y="3" width="12" height="11" rx="2" fill="none"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/>',
+    'cube': '<path d="M8 1.5l6 3.2v6.6L8 14.5l-6-3.2V4.7zM2 4.7l6 3.2 6-3.2M8 7.9v6.6" fill="none"/>',
+    'plug': '<path d="M5.5 1.5v3M10.5 1.5v3M3.5 4.5h9v3a4.5 4.5 0 0 1-9 0zM8 12v2.5" fill="none"/>',
     'clock': '<circle cx="8" cy="8" r="6.5" fill="none"/><path d="M8 4.5V8l2.5 1.5" fill="none"/>',
 }
 
@@ -154,10 +168,12 @@ ICONS = {
 def tiles(p, s, t):
     h, gap = 118, 16
     w = (W - 3 * gap) / 4
-    items = [('pulse', f"{s['total']:,}", 'contributions · 12 months'),
-             ('flame', f"{s['longest']}", 'day longest streak'),
-             ('cal', f"{s['active']}", 'active days · 12 months'),
-             ('clock', f"{s['years']}", f"years on GitHub · {s['repos']} repos")]
+    items = [(x['icon'], x['value'], x['label']) for x in p.get('highlights', [])]
+    items += [('pulse', f"{s['total']:,}", 'contributions · 12 months'),
+              ('cal', f"{s['active']}", 'active days · 12 months'),
+              ('flame', f"{s['longest']}", 'day longest streak'),
+              ('clock', f"{s['years']}", f"years on GitHub · {s['repos']} repos")]
+    items = items[:4]
     body = []
     for i, (icon, num, label) in enumerate(items):
         x = i * (w + gap)
@@ -239,7 +255,7 @@ def stack(p, s, t):
 def project(proj, repo, t):
     cw, h = W / 2, 136
     title = proj.get('title') or repo['name']
-    desc = proj.get('description') or repo['description'] or ''
+    desc = proj.get('description') or (repo or {}).get('description') or ''
     words, lines = desc.split(), ['']
     for word in words:
         if tw(lines[-1] + ' ' + word, 13) > cw - 70 and lines[-1]:
@@ -249,18 +265,33 @@ def project(proj, repo, t):
             lines.append(word)
         else:
             lines[-1] = (lines[-1] + ' ' + word).strip()
-    lang = proj.get('language') or repo['primaryLanguage']
     body = [card(4, 0, cw - 8, h, t),
-            f'<g transform="translate(26,25)" stroke="{t["muted"]}" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round">'
-            '<path d="M2 2.5A1.5 1.5 0 0 1 3.5 1H13v11H3.5A1.5 1.5 0 0 0 2 13.5zM2 13.5A1.5 1.5 0 0 0 3.5 15H13v-3"/></g>',
-            text(50, 38, title, 15, t['text'], 600)]
-    body += [text(26, 66 + i * 19, ln, 13, t['muted']) for i, ln in enumerate(lines) if ln]
-    if lang:
+            f'<rect x="26" y="27" width="8" height="8" rx="2" fill="{t["accent"]}"/>',
+            text(46, 36, title, 15, t['text'], 600)]
+    body += [text(26, 64 + i * 19, ln, 13, t['muted']) for i, ln in enumerate(lines) if ln]
+    if proj.get('tech'):
+        body.append(text(26, h - 22, proj['tech'], 11, t['muted'], family=MONO))
+    elif repo and repo['primaryLanguage']:
+        lang = repo['primaryLanguage']
         body += [f'<circle cx="31" cy="{h - 26}" r="5" fill="{lang["color"] or t["muted"]}"/>',
                  text(42, h - 22, lang['name'], 12, t['muted'])]
-    if repo['stargazerCount']:
+    if repo and repo['stargazerCount']:
         body.append(text(cw - 26, h - 22, f"★ {repo['stargazerCount']}", 12, t['muted'], anchor='end'))
     return svg(h, ''.join(body), f"{title}: {desc}").replace(f'width="{W}"', f'width="{cw:.0f}"').replace(f'viewBox="0 0 {W} {h}"', f'viewBox="0 0 {cw:.0f} {h}"')
+
+
+def about(p, t):
+    h, cols = 112, p['background']
+    cw = (W - 56) / len(cols)
+    body = [card(0, 0, W, h, t)]
+    for i, col in enumerate(cols):
+        x = 28 + i * cw
+        if i:
+            body.append(f'<line x1="{x - 14:.1f}" y1="26" x2="{x - 14:.1f}" y2="{h - 26}" stroke="{t["line"]}"/>')
+        body.append(text(f'{x:.1f}', 38, col['label'], 11, t['muted'], family=MONO, extra='letter-spacing="1"'))
+        body += [text(f'{x:.1f}', 64 + j * 20, ln, 13 if j else 14, t['muted'] if j else t['text'], 400 if j else 500)
+                 for j, ln in enumerate(col['lines'])]
+    return svg(h, ''.join(body), 'Education, recognition and languages')
 
 
 def main():
@@ -275,8 +306,10 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     for name, t in THEMES.items():
         files = {'header': header(p, s, t), 'stats': tiles(p, s, t), 'calendar': calendar(p, s, t), 'stack': stack(p, s, t)}
-        for proj in p['projects']:
-            files[f"project-{proj['repo'].lower()}"] = project(proj, repos[proj['repo']], t)
+        if p.get('background'):
+            files['about'] = about(p, t)
+        for i, proj in enumerate(p['projects'], 1):
+            files[f'work-{i}'] = project(proj, repos.get(proj.get('repo')), t)
         for key, content in files.items():
             with open(f'{a.out}/{key}-{name}.svg', 'w') as f:
                 f.write(content)
