@@ -1,0 +1,43 @@
+{
+  "login": "Mushfikur007",
+  "name": "Mushfikur Rahman",
+  "role": "Senior Software Engineer · Betopia Group",
+  "tagline": "I design and ship ERP systems on Odoo 19.",
+  "location": "Gazipur, Dhaka",
+  "stack": [
+    "Python",
+    "Odoo 19",
+    "PostgreSQL",
+    "JavaScript",
+    "OWL",
+    "QWeb / XML",
+    "JSON-RPC",
+    "Linux",
+    "Nginx",
+    "Git",
+    "GitHub Actions"
+  ],
+  "focus": [
+    "ERP architecture and custom Odoo modules",
+    "Payroll, HR and accounting automation",
+    "Data migration and company consolidation"
+  ],
+  "projects": [
+    {
+      "repo": "ora"
+    },
+    {
+      "repo": "EduHub",
+      "description": "Learning management system with OAuth sign-in, courses and admin tools."
+    },
+    {
+      "repo": "EasyEV-Charging-using-php-and-mySQL",
+      "title": "EasyEV Charging",
+      "description": "EV charging locations, check-in/out sessions and history in PHP + MySQL."
+    },
+    {
+      "repo": "portfolio",
+      "description": "Personal portfolio site."
+    }
+  ]
+}
