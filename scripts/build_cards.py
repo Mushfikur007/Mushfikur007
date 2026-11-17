@@ -160,21 +160,19 @@ ICONS = {
     'pulse': '<polyline points="1,8 4.5,8 6.5,3 9.5,13 11.5,8 15,8" fill="none"/>',
     'flame': '<path d="M8 1.5c.6 2.6 3.6 4 3.6 7.6a3.6 3.6 0 0 1-7.2 0c0-1.7.8-2.7 1.7-3.5.2 1.3.9 2 1.6 2.2C7 6 7.3 3.6 8 1.5z" fill="none"/>',
     'cal': '<rect x="2" y="3" width="12" height="11" rx="2" fill="none"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/>',
-    'cube': '<path d="M8 1.5l6 3.2v6.6L8 14.5l-6-3.2V4.7zM2 4.7l6 3.2 6-3.2M8 7.9v6.6" fill="none"/>',
-    'plug': '<path d="M5.5 1.5v3M10.5 1.5v3M3.5 4.5h9v3a4.5 4.5 0 0 1-9 0zM8 12v2.5" fill="none"/>',
-    'clock': '<circle cx="8" cy="8" r="6.5" fill="none"/><path d="M8 4.5V8l2.5 1.5" fill="none"/>',
+    'trend': '<path d="M1.5 12L6 7.5l3 2.5 5.5-6M10.5 4h4v4" fill="none"/>',
 }
 
 
 def tiles(p, s, t):
     h, gap = 118, 16
     w = (W - 3 * gap) / 4
-    items = [(x['icon'], x['value'], x['label']) for x in p.get('highlights', [])]
-    items += [('pulse', f"{s['total']:,}", 'contributions · 12 months'),
-              ('cal', f"{s['active']}", 'active days · 12 months'),
-              ('flame', f"{s['longest']}", 'day longest streak'),
-              ('clock', f"{s['years']}", f"years on GitHub · {s['repos']} repos")]
-    items = items[:4]
+    month = dt.date.fromisoformat(s['days'][-1]['date'])
+    this_month = sum(d['contributionCount'] for d in s['days'] if d['date'][:7] == month.isoformat()[:7])
+    items = [('pulse', f"{s['total']:,}", 'contributions · 12 months'),
+             ('trend', f"{this_month:,}", f"contributions in {month:%B}"),
+             ('cal', f"{s['active']}", 'active days · 12 months'),
+             ('flame', f"{s['longest']}", 'day longest streak')]
     body = []
     for i, (icon, num, label) in enumerate(items):
         x = i * (w + gap)

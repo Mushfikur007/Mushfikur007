@@ -56,18 +56,6 @@
     }
   ],
   "email": "mail.mushfikurrahman@gmail.com",
-  "highlights": [
-    {
-      "icon": "cube",
-      "value": "29+",
-      "label": "Odoo modules in production"
-    },
-    {
-      "icon": "plug",
-      "value": "26+",
-      "label": "tested mobile API endpoints"
-    }
-  ],
   "background": [
     {
       "label": "education",
