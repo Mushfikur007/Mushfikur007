@@ -7,6 +7,7 @@ GitHub GraphQL API for everything that is counted.
 """
 import argparse
 import datetime as dt
+import hashlib
 import json
 import math
 import os
@@ -200,7 +201,10 @@ def calendar(p, s, t):
 
     gx = (W - len(weeks) * pitch + 3) / 2 + 12
     gy = 74
-    body = [card(0, 0, W, h, t),
+    body = ['<style>.tw1,.tw2{animation:tw1 3s ease-in-out infinite}.tw2{animation-name:tw2}'
+            '@keyframes tw1{50%{opacity:.45}}@keyframes tw2{50%{opacity:.15}}'
+            '@media (prefers-reduced-motion:reduce){.tw1,.tw2{animation:none}}</style>',
+            card(0, 0, W, h, t),
             text(28, 40, 'Contributions', 15, t['text'], 600),
             text(W - 28, 40, f"{s['total']:,} in the last year", 13, t['muted'], anchor='end')]
     last_month = None
@@ -208,8 +212,13 @@ def calendar(p, s, t):
         for d in wk:
             date = dt.date.fromisoformat(d['date'])
             row = (date.weekday() + 1) % 7
+            lv = level(d['contributionCount'])
+            # active days twinkle like stars: stable pseudo-random speed and phase per date
+            seed = int(hashlib.md5(d['date'].encode()).hexdigest()[:8], 16)
+            twinkle = (f' class="tw{1 + (lv > 2)}" style="animation-duration:{2.2 + seed % 40 / 10:.1f}s;'
+                       f'animation-delay:-{seed // 40 % 60 / 10:.1f}s"') if lv else ''
             body.append(f'<rect x="{gx + wi * pitch:.1f}" y="{gy + row * pitch}" width="{cell}" height="{cell}" rx="2.5" '
-                        f'fill="{t["heat"][level(d["contributionCount"])]}"><title>{d["contributionCount"]} on {d["date"]}</title></rect>')
+                        f'fill="{t["heat"][lv]}"{twinkle}><title>{d["contributionCount"]} on {d["date"]}</title></rect>')
         m = dt.date.fromisoformat(wk[0]['date']).strftime('%b')
         if m != last_month and wi < len(weeks) - 2:
             body.append(text(f'{gx + wi * pitch:.1f}', gy - 10, m, 10, t['muted'], family=MONO))
